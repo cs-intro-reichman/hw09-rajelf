@@ -94,26 +94,26 @@ public class LanguageModel {
 	 * @param numberOfLetters - the size of text to generate
 	 * @return the generated text
 	 */
-	public String generate(String initialText, int textLength) {
-        if (initialText.length() < windowLength || textLength <= initialText.length()) {
-            return initialText; // Cannot generate text or no need to generate more text
-        }
-    
+    public String generate(String initialText, int textLength) {
         StringBuilder generatedText = new StringBuilder(initialText);
-        while (generatedText.length() < textLength) {
-            String currentWindow = generatedText.substring(generatedText.length() - windowLength);
+        while (generatedText.length() < textLength + initialText.length()) {
+            String currentWindow = generatedText.substring(Math.max(0, generatedText.length() - windowLength));
             List probs = CharDataMap.get(currentWindow);
             
+            // If the current window is not found, break the loop
             if (probs == null) {
-                break; // If the current window is not found, stop the generation process
+                break;
             }
-    
-            char nextChar = getRandomChar(probs); // Get a random character based on the current window's probabilities
+            
+            // Get a random character based on the current window's probabilities
+            char nextChar = getRandomChar(probs);
             generatedText.append(nextChar); // Append the selected character to the generated text
         }
+        
+        // Truncate the generated text to the desired length
+        return generatedText.substring(initialText.length(), Math.min(generatedText.length(), initialText.length() + textLength));
+    }
     
-        return generatedText.toString();
-	}
 
     /** Returns a string representing the map of this language model. */
 	public String toString() {
